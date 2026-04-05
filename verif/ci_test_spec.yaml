@@ -1,0 +1,11 @@
+very_first_test_spec:
+  description: "This is my first test "
+  plusargs:
+    - +UVM_VERBOSITY=UVM_LOW
+    - +en_first_seq=1
+
+my_second_test_spec:
+  description: "This is my second test "
+  plusargs:
+    - +UVM_VERBOSITY=UVM_LOW
+    - +en_second_seq=1
