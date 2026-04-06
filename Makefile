@@ -1,6 +1,6 @@
 TOP=tb
 TEST ?= my_test
-RUN_ARGS ?=
+RUN_ARGS ?= $(shell python3 extract_all_tests.py)
 
 VLOG=vlog -sv -linedebug
 VSIM=vsim -voptargs=+acc=rt
@@ -16,6 +16,12 @@ compile:
 
 run:
 	$(VSIM) -c -sv_seed random $(TOP) +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do "run -all; quit"
+
+newrun.%:
+	$(eval TEST_NAME=$*)
+	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
+	$(VSIM) -c -sv_seed random $(TOP) +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do "run -all; quit"
+
 
 gui:
 	$(VSIM)  $(TOP) +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do "add wave -r /*; run -all"
