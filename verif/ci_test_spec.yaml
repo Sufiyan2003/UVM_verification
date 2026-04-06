@@ -1,11 +1,13 @@
-very_first_test_spec:
+randomize_read_write_test_ci:
   description: "This is my first test "
   plusargs:
     - +UVM_VERBOSITY=UVM_LOW
-    - +en_first_seq=1
+    - +num_transactions=100
+    - +fifo_full_test=0
 
-my_second_test_spec:
+only_write_to_fifo_ci:
   description: "This is my second test "
   plusargs:
     - +UVM_VERBOSITY=UVM_LOW
-    - +en_second_seq=1
+    - +num_transactions=100
+    - +fifo_full_test=1
