@@ -1,4 +1,4 @@
-TOP=tb
+TOP=dm_cache_tb
 TEST ?= my_test
 RUN_ARGS ?= $(shell python3 extract_all_tests.py)
 DO_CMD ?= "run -all; quit"
@@ -14,8 +14,8 @@ endif
 VLOG=vlog -sv -linedebug
 VSIM=vsim -voptargs=+acc=rt
 
-DESIGN_DIR := ./design/async_fifo_2/*.sv
-VERIF_DIR=./verif/async_fifo/*.sv
+DESIGN_DIR := ./design/cache/*.sv
+VERIF_DIR := $(shell find ./verif/direct_mapped_cache -name *.sv)
 # VERIF_DIR=./verif/async_fifo_TB.sv
 
 # all: compile run
