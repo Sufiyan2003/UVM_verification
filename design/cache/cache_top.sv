@@ -52,7 +52,7 @@ module cache_top
 			hit_1                 <= 'h0;
 			miss_1                <= 'h0;
 			wr_port.o_data        <= 'h0;
-			rd_port.rd_data_valid <= 'h0;
+			wr_port.rd_data_valid <= 'h0;
 		end else if(rd_port.rd_addr) begin
 			if(cache_hit) begin
 				hit_1        <= 1'b1;
@@ -98,10 +98,10 @@ module cache_top
 		if(~rst_n) begin
 			clear_miss <= 1'b1;
 		end else begin
-			if(wr_port.wr_data_valid && rd_port.miss) begin
+			if(wr_port.wr_data_valid && wr_port.miss) begin
 				clear_miss <= 1'b1;
 			end
-			else if(rd_port.miss) begin
+			else if(wr_port.miss) begin
 				clear_miss <= 1'b0;
 			end
 			else begin

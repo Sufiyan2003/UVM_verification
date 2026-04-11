@@ -3,7 +3,7 @@ import sys
 
 
 # get this yaml file and extract all the test cases from this here yaml
-file_name = "./verif/async_fifo/test_spec.yaml"
+file_name = "./verif/direct_mapped_cache/cache_test_spec.yaml"
 
 def parse_yaml(test_name):
     with open(file_name, 'r') as f:

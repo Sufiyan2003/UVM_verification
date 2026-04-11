@@ -11,16 +11,24 @@ class cache_req_seq extends uvm_sequence;
 	`uvm_object_utils(cache_req_seq)
 	
 	cache_tx new_cache_tx;
+	int num_rd_cmds=100;
+
 
 	function new(string name="cache_req_seq");
 		super.new(name);
 		new_cache_tx = new();
 	endfunction : new
 
+
+
 	virtual task body();
-		for(int i=0; i < 100; i++) begin
+		for(int i=0; i < num_rd_cmds; i++) begin
 			new_cache_tx.randomize_tr();
-			`uvm_do(new_cache_tx);
+			start_item(new_cache_tx);
+			`uvm_info("[SEQ]", "Driving the interface", UVM_LOW)
+			new_cache_tx.randomize_tr();
+			finish_item(new_cache_tx);
+
 		end
 	endtask : body
 

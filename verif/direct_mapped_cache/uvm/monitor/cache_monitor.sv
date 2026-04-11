@@ -34,10 +34,10 @@ class cache_monitor extends uvm_component;
 		cache_rsp_port = new("cache_rsp_port", this);
 
 		// get interfaces
-		if(!uvm_config_db#(virtual cache_if #(32,32))::get(this, "", "cache_vif", cache_vif))
+		if(!uvm_config_db#(virtual cache_rd_port #(32,32))::get(this, "", "rd_vif", cache_vif))
 			`uvm_fatal("[CACHE_MONITOR]", "Unable to get cache input interface")
 
-		if(!uvm_config_db#(virtual cache_of #(32))::get(this, "", "cache_vof", cache_vof))
+		if(!uvm_config_db#(virtual cache_wr_port #(32))::get(this, "", "wr_vif", cache_vof))
 			`uvm_fatal("[CACHE_MONITOR]", "Unable to get cache response interface")
 	endfunction : build_phase
 

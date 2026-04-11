@@ -19,7 +19,7 @@ class cache_driver extends uvm_driver #(cache_tx);
 
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		if(!uvm_config_db#()::get(this, "", "rd_vif", rd_port))
+		if(!uvm_config_db#(virtual cache_rd_port#(32,32))::get(this, "", "rd_vif", rd_port))
 			`uvm_fatal("[CACHE_DRIVER]", "Cannot get rd_vif")
 		
 	endfunction : build_phase

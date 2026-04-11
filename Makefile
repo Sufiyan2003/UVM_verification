@@ -8,7 +8,7 @@ VSIM = vsim -c -voptargs=+acc=rt
 # Project structure
 ROOT = $(CURDIR)
 TOP = dm_cache_tb
-TEST ?= my_test
+TEST ?= cache_base_test
 WAVE ?= 0
 
 # DO command configuration
