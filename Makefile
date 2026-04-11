@@ -3,7 +3,7 @@
 # Tool configurations
 UVM_PATH = C:/altera/25.1std/questa_fse/verilog_src/uvm-1.2/src
 VLOG = vlog -sv -linedebug
-VSIM = vsim -c -voptargs=+acc=rt
+VSIM = vsim -voptargs=+acc=rt
 
 # Project structure
 ROOT = $(CURDIR)
