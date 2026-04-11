@@ -9,9 +9,8 @@
 class cache_driver extends uvm_driver #(cache_tx);
 	`uvm_component_utils(cache_driver)
 
-	virtual cache_if #(32,32) cache_vif;
 	cache_tx cache_inp_tx;
-
+	virtual cache_rd_port #(32,32) rd_port;
 
 	function new(string name="cache_driver", uvm_component parent);
 		super.new(name, parent);
@@ -20,6 +19,8 @@ class cache_driver extends uvm_driver #(cache_tx);
 
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
+		if(!uvm_config_db#()::get(this, "", "rd_vif", rd_port))
+			`uvm_fatal("[CACHE_DRIVER]", "Cannot get rd_vif")
 		
 	endfunction : build_phase
 
@@ -30,9 +31,12 @@ class cache_driver extends uvm_driver #(cache_tx);
 			// driver the interface
 			seq_item_port.get_next_item(cache_inp_tx);
 			// randomize the transaction here
-			@(posedge cache_vif.clk);
-			
-			@(posedge cache_vif.clk);
+			@(posedge rd_port.clk);
+			cache_inp_tx.randomize_tr();
+			rd_port.address <= cache_inp_tx.address;
+			rd_port.rd_addr <= cache_inp_tx.rd_cmd;
+			// driver the interface here
+			@(posedge rd_port.clk);
 			seq_item_port.item_done();
 		end
 		

@@ -5,15 +5,15 @@
 ------------------------------------------------------------------------------*/
 
 package cache_pkg;
-	
+	import uvm_pkg::*;
+ 	`include "uvm_macros.svh"
+  // Include all files in the CORRECT order
 	`include "cache_tx.sv"
-	`include "cache_if.sv"
-	`include "cache_write_seq.sv"
+	`include "cache_req_seq.sv"
 	`include "cache_driver.sv"
 	`include "cache_monitor.sv"
-	// agents
-	// env
+	`include "cache_agent.sv"
+	`include "cache_env.sv"
+	`include "cache_base_test.sv"
 	// scoreboard
-	// coverage
-	// test
 endpackage : cache_pkg

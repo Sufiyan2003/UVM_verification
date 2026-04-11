@@ -1,0 +1,30 @@
+# This is the test spec for a cache
+
+
+#######################################################################
+#######################################################################
+####
+#### Test spec should support direct mapped for now
+#### On hit the corresponding data should be written to the correct position
+#### On miss there should be a stall and the cache should be written
+#### on the next cycle
+#### Things to be tested:
+#### 
+#### 1. Correct hit behavior
+#### 2. Correct miss behavior
+#### 3. Mixed scnenarios
+#### 4. 
+####
+#######################################################################
+#######################################################################
+
+
+repeated_cache_hit_test:
+ description: "This test is to repeatdely only hit scenarios that hit the cache"
+ plusargs:
+  - +UVM_VERBOSITY=UVM_LOW
+  - +num_rd_cmds=1000
+  - +hit_test=1
+
+
+

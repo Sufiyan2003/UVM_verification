@@ -10,8 +10,8 @@ class cache_monitor extends uvm_component;
 	`uvm_component_utils(cache_monitor)
 
 	// virtual interfaces
-	virtual cache_if #(32,32) cache_vif;
-	virtual cache_of #(32)    cache_vof;
+	virtual cache_rd_port #(32,32) cache_vif;
+	virtual cache_wr_port #(32)    cache_vof;
 	
 	// transactions
 	cache_tx  cache_inp_tx;
@@ -22,8 +22,8 @@ class cache_monitor extends uvm_component;
 	uvm_analysis_port #(cache_rsp) cache_rsp_port;
 
 
-	function new(string name = "cache_monitor");
-		super.new(name);
+	function new(string name = "cache_monitor", uvm_component parent);
+		super.new(name,parent);
 		cache_inp_tx = new();
 		cache_rsp_tx = new();
 	endfunction : new
@@ -49,9 +49,7 @@ class cache_monitor extends uvm_component;
 				forever begin
 					@(posedge cache_vif.clk);
 					cache_inp_tx.address = cache_vif.address;
-					cache_inp_tx.wr_cmd = cache_vif.write_addr;
-					cache_inp_tx.rd_cmd = cache_vif.read_addr;
-					cache_inp_tx.data = cache_vif.write_data;
+					cache_inp_tx.rd_cmd = cache_vif.rd_addr;
 					cache_inp_port.write(cache_inp_tx);
 					@(posedge cache_vif.clk);
 				end
@@ -59,10 +57,12 @@ class cache_monitor extends uvm_component;
 			begin // thread to sample output interface
 				forever begin
 					@(posedge cache_vof.clk);
+					cache_rsp_tx.wr_data = cache_vof.wr_data;
+					cache_rsp_tx.wr_data_valid = cache_vof.wr_data_valid;
 					cache_rsp_tx.hit = cache_vof.hit;
 					cache_rsp_tx.miss = cache_vof.miss;
-					cache_rsp_tx.data_valid = cache_vof.valid_data;
-					cache_rsp_tx.data_out = cache_vof.o_data;
+					cache_rsp_tx.o_data = cache_vof.o_data;
+					cache_rsp_tx.rd_data_valid = cache_vof.rd_data_valid;
 					cache_rsp_port.write(cache_rsp_tx);
 					@(posedge cache_vof.clk);
 				end

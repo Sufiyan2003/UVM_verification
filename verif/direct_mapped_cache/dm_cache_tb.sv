@@ -1,20 +1,22 @@
 `timescale 1ns/1ps
-`include "uvm_macros.svh"
-import uvm_pkg::*;
 
-// include package here
-import cache_pkg::*;
+module dm_cache_tb;
 
+	import uvm_pkg::*;
+	`include "uvm_macros.svh"
 
+	// include package here
+	import cache_pkg::*;
 
-
-
-module dm_cache_tb();
 	logic clk;
 	logic resetn;
 	// include rtl connection file here
 
+	parameter LINE_WIDTH=32;
+	parameter ADDR_WIDTH = 32;
 
+	cache_rd_port #(ADDR_WIDTH,LINE_WIDTH) rd_port(clk, resetn);
+	cache_wr_port #(LINE_WIDTH)            wr_port(clk,resetn);
 
 	// instantiate interface
 	cache_if #(32,32) cache_vif(clk, resetn);
@@ -23,35 +25,36 @@ module dm_cache_tb();
 	// instantiate dut
 	cache_top direct_mapped_cache
 	(
-	.clk           (clk),    // Clock
-	.rst_n         (resetn),    // Asynchronous reset active low
-	.i_address     (cache_vif.address),    // input address
-
-	.i_fetch_addr  (cache_vif.read_addr),    // check if address is present 
-	.i_wr_data     (cache_vif.write_data),    // this is to write data 
-	.i_put_data    (cache_vif.write_addr),    // to write into the cache
-	.o_data        (cache_vof.o_data),    // byte data out (on hit)
-
-	.o_data_valid  (cache_vof.valid_data),    // data on the output bus is from the cache
-	.o_hit         (cache_vof.hit),    // address present in cache
-	.o_miss        (cache_vof.miss)     // address not present in cache (fetch from some
-
-
+		.clk           (clk),    // Clock
+		.rst_n         (resetn),    // Asynchronous reset active low
+		.wr_port       (wr_port),
+		.rd_port       (rd_port)
 	);
 
 	// initialize signal values
 	initial begin
 		clk = 0;
 		resetn = 1'b1;
+		uvm_config_db#(virtual cache_wr_port#(LINE_WIDTH))::set(null, "*", "wr_vif", wr_port);
+    	uvm_config_db#(virtual cache_rd_port#(ADDR_WIDTH,LINE_WIDTH))::set(null, "*", "rd_vif", rd_port);
 	end
 
 	// drive resetn
 	initial begin
+		resetn = 1'b1;
 		#10ns;
 		resetn = 1'b0;
 		#10ns;
 		resetn = 1'b1;
 	end
+
+	// simulation starts after 20ns
+	initial begin
+		run_test();
+	end
+
+
+
 
 	// generate clk
 	always #(5ns) clk = ~clk;
