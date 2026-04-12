@@ -3,9 +3,6 @@
 --  Date: 07_04_2026
 --  Description: This is to send reads to the cache
 ------------------------------------------------------------------------------*/
-import uvm_pkg::*;
-`include "uvm_macros.svh"
-
 
 class cache_req_seq extends uvm_sequence;
 	`uvm_object_utils(cache_req_seq)
