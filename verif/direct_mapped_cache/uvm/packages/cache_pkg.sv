@@ -8,6 +8,7 @@ package cache_pkg;
 	import uvm_pkg::*;
  	`include "uvm_macros.svh"
   // Include all files in the CORRECT order
+  	`include "cache_config.sv"
 	`include "cache_tx.sv"
 	`include "cache_req_seq.sv"
 	`include "cache_driver.sv"

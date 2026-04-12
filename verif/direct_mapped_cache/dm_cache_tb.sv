@@ -22,6 +22,12 @@ module dm_cache_tb;
 	cache_if #(32,32) cache_vif(clk, resetn);
 	cache_of #(32)    cache_vof(clk, resetn);
 
+	// instantiate config
+	cache_config cache_cfg;
+
+
+
+
 	// instantiate dut
 	cache_top direct_mapped_cache
 	(
@@ -37,6 +43,9 @@ module dm_cache_tb;
 		resetn = 1'b1;
 		uvm_config_db#(virtual cache_wr_port#(LINE_WIDTH))::set(null, "*", "wr_vif", wr_port);
     	uvm_config_db#(virtual cache_rd_port#(ADDR_WIDTH,LINE_WIDTH))::set(null, "*", "rd_vif", rd_port);
+
+    	cache_cfg = cache_config::type_id::create("cache_cfg", null);
+    	uvm_config_db#(cache_config)::set(null, "*", "cache_cfg", cache_cfg);	
 	end
 
 	// drive resetn

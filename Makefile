@@ -40,6 +40,7 @@ compile:
 	+incdir+./verif/direct_mapped_cache/uvm/agents \
 	+incdir+./verif/direct_mapped_cache/uvm/env \
 	+incdir+./verif/direct_mapped_cache/uvm/test \
+	+incdir+./verif/direct_mapped_cache/uvm/config \
 	+incdir+./verif/direct_mapped_cache/uvm/packages \
 	+incdir+./verif/direct_mapped_cache/uvm/tb \
 	./design/cache/cache_top.sv \

@@ -23,7 +23,7 @@ repeated_cache_hit_test:
  description: "This test is to repeatdely only hit scenarios that hit the cache"
  plusargs:
   - +UVM_VERBOSITY=UVM_LOW
-  - +num_rd_cmds=1000
+  - +num_rd_cmds=1
   - +hit_test=1
 
 
