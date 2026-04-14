@@ -42,3 +42,23 @@ class cache_rsp extends uvm_sequence_item;
     endfunction
 
 endclass
+
+
+class cache_mem_rsp extends uvm_sequence_item;
+    `uvm_object_utils(cache_mem_rsp)
+    
+    rand bit [31:0]     mem_data    ;
+    bit      [31:0]     address     ;
+    bit                 req         ;
+    bit                 mem_ready   ;
+
+    function new(string name="cache_mem_rsp");
+        super.new(name);
+    endfunction
+
+    function void generate_random_data();
+        mem_ready = 1'b1;
+        mem_data = $urandom();
+    endfunction : generate_random_data
+endclass
+

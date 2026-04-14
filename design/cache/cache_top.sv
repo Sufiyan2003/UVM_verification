@@ -13,10 +13,11 @@ module cache_top
 	parameter DEPTH=16
 )(
 	
-	input                                   clk           ,    // Clock
-	input                                   rst_n         ,    // Asynchronous reset active low
-	cache_inp_if                            inp_port       ,
-	cache_out_if                            out_port
+	input                                   clk           ,    	// Clock
+	input                                   rst_n         ,    	// Asynchronous reset active low
+	cache_inp_if                            inp_port      ,
+	cache_out_if                            out_port	  ,
+	cache_mem_if							mem_port			// This is to fill the cache in case of a miss
 );
 
 	localparam NO_BLOCK_BITS = $clog2(LINE_WIDTH/8)							;
@@ -66,6 +67,9 @@ module cache_top
 				hit_1                 <= 1'b0;
 				miss_1                <= 1'b1;
 				out_port.o_valid 	  <= 1'b0;
+				
+				// request data from external memory
+				mem_port.address      <= inp_port.address;
 			end			
 		end
 		// else begin // simple handshake, need to change 
@@ -130,6 +134,9 @@ module cache_top
 
 	assign out_port.hit  = hit_1;
 	assign out_port.miss = miss_1 && !clear_miss;
+
+	// request line from external memory
+	assign mem_port.req = out_port.miss;
 
 endmodule : cache_top
 

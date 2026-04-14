@@ -19,7 +19,8 @@ module dm_cache_tb;
 
 	// instantiate interfaces
 	cache_inp_if #(ADDR_WIDTH,LINE_WIDTH) inp_vif(clk, resetn)	;
-	cache_out_if #(LINE_WIDTH)            out_vif(clk,resetn)	;
+	cache_out_if #(LINE_WIDTH)            out_vif(clk, resetn)	;
+	cache_mem_if #(ADDR_WIDTH,LINE_WIDTH) mem_vif(clk, resetn)	;
 
 
 	// instantiate config
@@ -34,15 +35,19 @@ module dm_cache_tb;
 		.clk           		(clk)		,    // Clock
 		.rst_n         		(resetn)	,    // Asynchronous reset active low
 		.cache_inp_if       (out_vif)	,
-		.cache_out_if       (inp_vif)
+		.cache_out_if       (inp_vif)	,
+		.mem_port			(mem_vif)	
 	);
 
 	// initialize signal values
 	initial begin
 		clk = 0;
 		resetn = 1'b1;
+
+		// set interfaces in config db
 		uvm_config_db#(virtual cache_out_if#(LINE_WIDTH))::set(null, "*", "out_vif", out_vif);
     	uvm_config_db#(virtual cache_inp_if#(ADDR_WIDTH,LINE_WIDTH))::set(null, "*", "inp_vif", inp_vif);
+    	uvm_config_db#(virtual cache_mem_if#(ADDR_WIDTH,LINE_WIDTH))::set(null, "*", "mem_vif", mem_vif);
 
     	cache_cfg = cache_config::type_id::create("cache_cfg", null);
     	uvm_config_db#(cache_config)::set(null, "*", "cache_cfg", cache_cfg);	

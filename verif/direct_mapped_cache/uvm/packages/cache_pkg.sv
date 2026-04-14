@@ -16,7 +16,7 @@ package cache_pkg;
 	`include "cache_hit_seq.sv"
 
 	`include "cache_driver.sv"
-	// `include "cache_write_driver.sv" // need to change this driver this is just bad 
+	`include "cache_memory_driver.sv"
 	
 	`include "cache_monitor.sv"
 	`include "cache_agent.sv"

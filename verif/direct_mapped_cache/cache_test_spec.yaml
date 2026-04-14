@@ -27,5 +27,10 @@ cache_hit_test:
   - +num_rd_cmds=100
   - +hit_test=1
 
-
+cache_base_test:
+  description: "This is just to test the cache randomly"
+  plusargs:
+    - +UVM_VERBOSITY=UVM_LOW
+    - +UVM_TESTNAME=cache_base_test
+    - +num_rd_cmds=100
 

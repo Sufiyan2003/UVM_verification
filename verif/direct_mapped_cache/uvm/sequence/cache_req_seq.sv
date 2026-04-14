@@ -8,7 +8,7 @@ class cache_req_seq extends uvm_sequence;
 	`uvm_object_utils(cache_req_seq)
 	
 	cache_tx new_cache_tx;
-	int num_rd_cmds=100;
+	int num_rd_cmds;
 	cache_config cache_cfg;
 
 	function new(string name="cache_req_seq");
