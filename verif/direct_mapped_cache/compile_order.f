@@ -1,7 +1,0 @@
-"# Auto-generated compile order file" 
-"# Edit this file to fix compilation order if needed" 
-"" 
-"# Compile package first" 
-"C:/Users/sufiyan/Desktop/work/rtl_projects/UVM_verification/verif/direct_mapped_cache/uvm/packages/cache_pkg.sv" 
-"" 
-"# Then compile other UVM components" 
