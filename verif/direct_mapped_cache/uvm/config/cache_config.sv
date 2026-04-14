@@ -11,6 +11,9 @@ class cache_config extends uvm_component;
 	uvm_cmdline_processor clp;
 	int num_rd_cmds;
 	bit hit_test;
+	int cache_depth;
+	
+
 	string tmp;
 
 	function new(string name="cache_config", uvm_component parent);
@@ -23,7 +26,7 @@ class cache_config extends uvm_component;
 
 		// get the run time arguments
 		if(clp.get_arg_value("+num_rd_cmds=", tmp)) num_rd_cmds = tmp.atoi();
-		if(clp.get_arg_value("+hit_test=", tmp)) hit_test = tmp.atobin();
+		if(clp.get_arg_value("+hit_test="   , tmp)) hit_test    = tmp.atobin();
 
 
 	endfunction : build_phase

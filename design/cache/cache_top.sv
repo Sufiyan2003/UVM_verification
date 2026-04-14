@@ -16,12 +16,12 @@ module cache_top
 	input                                   clk           ,    // Clock
 	input                                   rst_n         ,    // Asynchronous reset active low
 	cache_rd_port                           rd_port       ,
-	cache_wr_port                           wr_port
+	cache_wr_port              wr_port
 );
 
-	parameter NO_BLOCK_BITS = $clog2(LINE_WIDTH/8);
-	parameter NO_LINE_BITS = $clog2(DEPTH);
-	parameter NO_TAG_BITS = ADDR_WIDTH - NO_LINE_BITS - NO_BLOCK_BITS;
+	localparam NO_BLOCK_BITS = $clog2(LINE_WIDTH/8);
+	localparam NO_LINE_BITS = $clog2(DEPTH);
+	localparam NO_TAG_BITS = ADDR_WIDTH - NO_LINE_BITS - NO_BLOCK_BITS;
 
 	// declare valids , tags, data, byte offset
 	logic                         valid_array[DEPTH];
@@ -32,7 +32,7 @@ module cache_top
 
 	logic [NO_BLOCK_BITS-1:0]                          block_offset;
 	logic [NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS] line_number;
-	logic [ADDR_WIDTH-NO_LINE_BITS-NO_BLOCK_BITS-1 : NO_LINE_BITS+NO_BLOCK_BITS] tag_value;
+	logic [ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS] tag_value;
 	logic hit_1;
 	logic miss_1;
 	logic clear_miss;

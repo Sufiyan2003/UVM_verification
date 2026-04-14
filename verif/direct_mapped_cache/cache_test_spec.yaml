@@ -19,11 +19,12 @@
 #######################################################################
 
 
-repeated_cache_hit_test:
+cache_hit_test:
  description: "This test is to repeatdely only hit scenarios that hit the cache"
  plusargs:
   - +UVM_VERBOSITY=UVM_LOW
-  - +num_rd_cmds=1
+  - +UVM_TESTNAME=cache_hit_test
+  - +num_rd_cmds=100
   - +hit_test=1
 
 

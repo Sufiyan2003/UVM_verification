@@ -2,7 +2,8 @@
 -- Author: Muhamamd Sufiyan Sadiq 
 --  Date: 07_04_2026
 --  
---  
+--  This agent is used to drive the rd port of the cache, to request a line from
+--  a cache
 ------------------------------------------------------------------------------*/
 
 
@@ -30,12 +31,12 @@ class cache_driver extends uvm_driver #(cache_tx);
 		forever begin
 			// driver the interface
 			seq_item_port.get_next_item(cache_inp_tx);
+			`uvm_info("[CACHE_DRIVER]", "Actually driving the interface", UVM_LOW)
 			// randomize the transaction here
+			$display("Driving=%0h",cache_inp_tx.address);
 			@(posedge rd_port.clk);
-			cache_inp_tx.randomize_tr();
 			rd_port.address <= cache_inp_tx.address;
 			rd_port.rd_addr <= cache_inp_tx.rd_cmd;
-			// driver the interface here
 			@(posedge rd_port.clk);
 			seq_item_port.item_done();
 		end

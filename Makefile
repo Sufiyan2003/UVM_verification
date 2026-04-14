@@ -3,7 +3,7 @@
 # Tool configurations
 UVM_PATH = C:/altera/25.1std/questa_fse/verilog_src/uvm-1.2/src
 VLOG = vlog -sv -linedebug
-VSIM = vsim -voptargs=+acc=rt
+VSIM = vsim -novopt
 
 # Project structure
 ROOT = $(CURDIR)
@@ -50,17 +50,24 @@ compile:
 run.%:
 	$(eval TEST_NAME=$*)
 	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
-	$(VSIM) -c -sv_seed random $(TOP) +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do $(DO_CMD)
+	$(VSIM) -c -sv_seed random $(TOP) $(RUN_ARGS) -do $(DO_CMD)
 
 gui.%:
 	$(eval TEST_NAME=$*)
 	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
-	$(VSIM)  $(TOP) +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do "add wave -r /*; run -all"
+	$(VSIM) -sv_seed random $(TOP)  $(RUN_ARGS) -do "add wave -r /*; run -all"
 
 debug.%:
 	$(eval TEST_NAME=$*)
 	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
-	$(VSIM) -debugDB $(TOP) +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do "add wave -r /*;"
+	$(VSIM) -debugDB $(TOP) +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do "log -r /*; add wave -r /*;"
 
 baremetal:
 	$(VSIM)  $(TOP)  $(RUN_ARGS) -do "add wave -r /*; run -all"
+
+
+runOpt.%:
+	$(eval TEST_NAME=$*)
+	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
+	vopt +acc $(TOP) -o $(TOP)_opt $(RUN_ARGS)
+	vsim -sv_seed random $(TOP)_opt $(RUN_ARGS) -do "log -r /*; add wave -r /*; run -all"

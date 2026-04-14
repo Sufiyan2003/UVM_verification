@@ -14,6 +14,7 @@ module dm_cache_tb;
 
 	parameter LINE_WIDTH=32;
 	parameter ADDR_WIDTH = 32;
+	parameter DEPTH =16;
 
 	cache_rd_port #(ADDR_WIDTH,LINE_WIDTH) rd_port(clk, resetn);
 	cache_wr_port #(LINE_WIDTH)            wr_port(clk,resetn);
@@ -29,7 +30,7 @@ module dm_cache_tb;
 
 
 	// instantiate dut
-	cache_top direct_mapped_cache
+	cache_top #(ADDR_WIDTH, LINE_WIDTH, DEPTH) direct_mapped_cache
 	(
 		.clk           (clk),    // Clock
 		.rst_n         (resetn),    // Asynchronous reset active low
@@ -46,6 +47,7 @@ module dm_cache_tb;
 
     	cache_cfg = cache_config::type_id::create("cache_cfg", null);
     	uvm_config_db#(cache_config)::set(null, "*", "cache_cfg", cache_cfg);	
+    	cache_cfg.cache_depth = 16;
 	end
 
 	// drive resetn
@@ -55,6 +57,7 @@ module dm_cache_tb;
 		resetn = 1'b0;
 		#10ns;
 		resetn = 1'b1;
+		#9000ns;
 	end
 
 	// simulation starts after 20ns
@@ -62,6 +65,11 @@ module dm_cache_tb;
 		run_test();
 	end
 
+	initial begin
+		$display("LINE_WIDTH=%0d",LINE_WIDTH);
+		$display("ADDR_WIDTH=%0d",ADDR_WIDTH);
+		$display("DEPTH=%0d",DEPTH);
+	end
 
 
 

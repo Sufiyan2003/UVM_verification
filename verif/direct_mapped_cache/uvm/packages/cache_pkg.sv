@@ -10,11 +10,20 @@ package cache_pkg;
   // Include all files in the CORRECT order
   	`include "cache_config.sv"
 	`include "cache_tx.sv"
+
+	/** Sequences*/
 	`include "cache_req_seq.sv"
+	`include "cache_hit_seq.sv"
+
 	`include "cache_driver.sv"
+	`include "cache_write_driver.sv"
+	
 	`include "cache_monitor.sv"
 	`include "cache_agent.sv"
 	`include "cache_env.sv"
-	`include "cache_base_test.sv"
 	// scoreboard
+
+	/**TESTS */
+	`include "cache_base_test.sv"
+	`include "cache_hit_test.sv"
 endpackage : cache_pkg

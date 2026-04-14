@@ -7,7 +7,7 @@
 class cache_base_test extends uvm_test;
 	`uvm_component_utils(cache_base_test)
 
-	cache_env env;
+	cache_env     env;
 	cache_req_seq seq;
 
 	function new(string name="cache_base_test", uvm_component parent);
@@ -21,12 +21,11 @@ class cache_base_test extends uvm_test;
 		seq = cache_req_seq::type_id::create("seq", this);
 	endfunction
 
+	// this task will be overriden by the class that extends base test
 	virtual task main_phase(uvm_phase phase);
-		phase.raise_objection(this);
 		// custom implementPtion in derived tests
 		// this will be overriden with that
-		seq.start(env.c_agent.c_seqr);
-		phase.drop_objection(this);
+		// seq.start(env.c_agent.c_seqr);
 	endtask : main_phase
 
 

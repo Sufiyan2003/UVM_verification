@@ -6,7 +6,7 @@
 
 class cache_env extends uvm_env;
 	`uvm_component_utils(cache_env)
-
+	
 	cache_agent c_agent;
 
 	function new(string name, uvm_component parent);
