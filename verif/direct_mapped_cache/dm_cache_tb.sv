@@ -16,12 +16,11 @@ module dm_cache_tb;
 	parameter ADDR_WIDTH = 32;
 	parameter DEPTH =16;
 
-	cache_rd_port #(ADDR_WIDTH,LINE_WIDTH) rd_port(clk, resetn);
-	cache_wr_port #(LINE_WIDTH)            wr_port(clk,resetn);
 
-	// instantiate interface
-	cache_if #(32,32) cache_vif(clk, resetn);
-	cache_of #(32)    cache_vof(clk, resetn);
+	// instantiate interfaces
+	cache_inp_if #(ADDR_WIDTH,LINE_WIDTH) inp_vif(clk, resetn)	;
+	cache_out_if #(LINE_WIDTH)            out_vif(clk,resetn)	;
+
 
 	// instantiate config
 	cache_config cache_cfg;
@@ -32,18 +31,18 @@ module dm_cache_tb;
 	// instantiate dut
 	cache_top #(ADDR_WIDTH, LINE_WIDTH, DEPTH) direct_mapped_cache
 	(
-		.clk           (clk),    // Clock
-		.rst_n         (resetn),    // Asynchronous reset active low
-		.wr_port       (wr_port),
-		.rd_port       (rd_port)
+		.clk           		(clk)		,    // Clock
+		.rst_n         		(resetn)	,    // Asynchronous reset active low
+		.cache_inp_if       (out_vif)	,
+		.cache_out_if       (inp_vif)
 	);
 
 	// initialize signal values
 	initial begin
 		clk = 0;
 		resetn = 1'b1;
-		uvm_config_db#(virtual cache_wr_port#(LINE_WIDTH))::set(null, "*", "wr_vif", wr_port);
-    	uvm_config_db#(virtual cache_rd_port#(ADDR_WIDTH,LINE_WIDTH))::set(null, "*", "rd_vif", rd_port);
+		uvm_config_db#(virtual cache_out_if#(LINE_WIDTH))::set(null, "*", "out_vif", out_vif);
+    	uvm_config_db#(virtual cache_inp_if#(ADDR_WIDTH,LINE_WIDTH))::set(null, "*", "inp_vif", inp_vif);
 
     	cache_cfg = cache_config::type_id::create("cache_cfg", null);
     	uvm_config_db#(cache_config)::set(null, "*", "cache_cfg", cache_cfg);	

@@ -2,7 +2,7 @@
 -- Author: Muhamamd Sufiyan Sadiq 
 --  Date: 07_04_2026
 --  
---  
+--  This is to record transactions coming inside of the cache
 ------------------------------------------------------------------------------*/
 
 // ths is the monitor to sample signals on input and ouput interface
@@ -10,64 +10,41 @@ class cache_monitor extends uvm_component;
 	`uvm_component_utils(cache_monitor)
 
 	// virtual interfaces
-	virtual cache_rd_port #(32,32) cache_vif;
-	virtual cache_wr_port #(32)    cache_vof;
+	virtual cache_inp_if #(32,32) cache_vif;
 	
 	// transactions
 	cache_tx  cache_inp_tx;
-	cache_rsp cache_rsp_tx;
 
 	// monitor application ports
 	uvm_analysis_port #(cache_tx)  cache_inp_port;
-	uvm_analysis_port #(cache_rsp) cache_rsp_port;
-
 
 	function new(string name = "cache_monitor", uvm_component parent);
 		super.new(name,parent);
 		cache_inp_tx = new();
-		cache_rsp_tx = new();
+
 	endfunction : new
 
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 		cache_inp_port = new("cache_inp_port", this);
-		cache_rsp_port = new("cache_rsp_port", this);
 
 		// get interfaces
-		if(!uvm_config_db#(virtual cache_rd_port #(32,32))::get(this, "", "rd_vif", cache_vif))
+		if(!uvm_config_db#(virtual cache_inp_if #(32,32))::get(this, "", "inp_vif", cache_vif))
 			`uvm_fatal("[CACHE_MONITOR]", "Unable to get cache input interface")
-
-		if(!uvm_config_db#(virtual cache_wr_port #(32))::get(this, "", "wr_vif", cache_vof))
-			`uvm_fatal("[CACHE_MONITOR]", "Unable to get cache response interface")
 	endfunction : build_phase
 
 
 	virtual task main_phase(uvm_phase phase);
 		super.main_phase(phase);
-		fork
-			begin // thread to sample input interface
-				forever begin
-					@(posedge cache_vif.clk);
-					cache_inp_tx.address = cache_vif.address;
-					cache_inp_tx.rd_cmd = cache_vif.rd_addr;
-					cache_inp_port.write(cache_inp_tx);
-					@(posedge cache_vif.clk);
-				end
-			end
-			begin // thread to sample output interface
-				forever begin
-					@(posedge cache_vof.clk);
-					cache_rsp_tx.wr_data = cache_vof.wr_data;
-					cache_rsp_tx.wr_data_valid = cache_vof.wr_data_valid;
-					cache_rsp_tx.hit = cache_vof.hit;
-					cache_rsp_tx.miss = cache_vof.miss;
-					cache_rsp_tx.o_data = cache_vof.o_data;
-					cache_rsp_tx.rd_data_valid = cache_vof.rd_data_valid;
-					cache_rsp_port.write(cache_rsp_tx);
-					@(posedge cache_vof.clk);
-				end
-			end
-		join
+		forever begin
+			@(posedge cache_vif.clk);
+			cache_inp_tx.address <= cache_vif.address;
+			cache_inp_tx.rd_en   <= cache_vif.rd_en;
+			cache_inp_tx.wr_en   <= cache_vif.wr_en;
+			cache_inp_tx.wr_data <= cache_vif.wr_data;
+			cache_inp_port.write(cache_inp_tx);
+			@(posedge cache_vif.clk);
+		end
 	endtask : main_phase
 
 

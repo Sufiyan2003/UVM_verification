@@ -15,33 +15,33 @@ module cache_top
 	
 	input                                   clk           ,    // Clock
 	input                                   rst_n         ,    // Asynchronous reset active low
-	cache_rd_port                           rd_port       ,
-	cache_wr_port              wr_port
+	cache_inp_if                            inp_port       ,
+	cache_out_if                            out_port
 );
 
-	localparam NO_BLOCK_BITS = $clog2(LINE_WIDTH/8);
-	localparam NO_LINE_BITS = $clog2(DEPTH);
-	localparam NO_TAG_BITS = ADDR_WIDTH - NO_LINE_BITS - NO_BLOCK_BITS;
+	localparam NO_BLOCK_BITS = $clog2(LINE_WIDTH/8)							;
+	localparam NO_LINE_BITS  = $clog2(DEPTH)								;
+	localparam NO_TAG_BITS   = ADDR_WIDTH - NO_LINE_BITS - NO_BLOCK_BITS	;
 
 	// declare valids , tags, data, byte offset
-	logic                         valid_array[DEPTH];
-	logic                         dirty_array[DEPTH];
-	logic [NO_TAG_BITS - 1 : 0]   tag_array[DEPTH];
-	logic [LINE_WIDTH-1:0]        mem_array[DEPTH];
+	logic                         valid_array[DEPTH]						;
+	logic                         dirty_array[DEPTH]						;
+	logic [NO_TAG_BITS - 1 : 0]   tag_array[DEPTH]							;
+	logic [LINE_WIDTH-1:0]        mem_array[DEPTH]							;
 
 
-	logic [NO_BLOCK_BITS-1:0]                          block_offset;
-	logic [NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS] line_number;
-	logic [ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS] tag_value;
-	logic hit_1;
-	logic miss_1;
-	logic clear_miss;
-	logic cache_hit;
+	logic [NO_BLOCK_BITS-1:0]                          	block_offset		;
+	logic [NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS] 	line_number			;
+	logic [ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS]  	tag_value			;
+	logic 											   	hit_1				;
+	logic 											   	miss_1				;
+	logic 											   	clear_miss			;
+	logic 												cache_hit			;
 
 	// decode the information from the i_address
-	assign block_offset             = rd_port.address[NO_BLOCK_BITS-1:0];
-	assign line_number              = rd_port.address[NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS];
-	assign tag_value                = rd_port.address[ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS];
+	assign block_offset             = inp_port.address[NO_BLOCK_BITS-1:0];
+	assign line_number              = inp_port.address[NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS];
+	assign tag_value                = inp_port.address[ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS];
 	assign cache_hit                = valid_array[line_number] && (tag_array[line_number] == tag_value);
 
 
@@ -51,21 +51,21 @@ module cache_top
 		if(~rst_n) begin
 			hit_1                 <= 'h0;
 			miss_1                <= 'h0;
-			wr_port.o_data        <= 'h0;
-			wr_port.rd_data_valid <= 'h0;
-		end else if(rd_port.rd_addr) begin
+			out_port.o_data        <= 'h0;
+			out_port.o_valid 	  <= 'h0;
+		end else if(inp_port.rd_en) begin
 			if(cache_hit) begin
 				hit_1        <= 1'b1;
 				miss_1       <= 1'b0;
 
-				// extract the 8bit data using the offset
-				wr_port.o_data        <= mem_array[line_number][block_offset*8 +: 8];
-				wr_port.rd_data_valid <= 1'b1;
+				// extract entire line (ignore block offset)
+				out_port.o_data        <= mem_array[line_number];
+				out_port.o_valid 	  <= 1'b1;
 			end
 			else begin
 				hit_1                 <= 1'b0;
 				miss_1                <= 1'b1;
-				wr_port.rd_data_valid <= 1'b0;
+				out_port.o_valid 	  <= 1'b0;
 			end			
 		end
 		// else begin // simple handshake, need to change 
@@ -84,10 +84,10 @@ module cache_top
 				mem_array[i]   <= 'h0;
 			end
 		end else begin
-			if(wr_port.wr_data_valid) begin
+			if(inp_port.wr_en) begin
 				tag_array[line_number]   <= tag_value;
 				valid_array[line_number] <= 1'b1;
-				mem_array[line_number]   <= wr_port.wr_data;
+				mem_array[line_number]   <= inp_port.wr_data;
 			end
 		end
 	end
@@ -98,10 +98,10 @@ module cache_top
 		if(~rst_n) begin
 			clear_miss <= 1'b1;
 		end else begin
-			if(wr_port.wr_data_valid && wr_port.miss) begin
+			if(inp_port.wr_en && out_port.miss) begin
 				clear_miss <= 1'b1;
 			end
-			else if(wr_port.miss) begin
+			else if(out_port.miss) begin
 				clear_miss <= 1'b0;
 			end
 			else begin
@@ -120,7 +120,7 @@ module cache_top
 				dirty_array[i] <= 'h0;
 			end
 		end else begin
-			if (wr_port.wr_data_valid && cache_hit) begin
+			if (out_port.wr_data_valid && cache_hit) begin
 				dirty_array[line_number] <= 1'b1;
 			end
 		end
@@ -128,8 +128,8 @@ module cache_top
 
 
 
-	assign wr_port.hit  = hit_1;
-	assign wr_port.miss = miss_1 && !clear_miss;
+	assign out_port.hit  = hit_1;
+	assign out_port.miss = miss_1 && !clear_miss;
 
 endmodule : cache_top
 

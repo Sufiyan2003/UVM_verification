@@ -23,7 +23,6 @@ class cache_req_seq extends uvm_sequence;
 	virtual task body();
 
 		for(int i=0; i < cache_cfg.num_rd_cmds; i++) begin
-			new_cache_tx.randomize_tr();
 			start_item(new_cache_tx);
 			`uvm_info("[REQ_SEQ]", "Driving the interface", UVM_LOW)
 			new_cache_tx.randomize_tr();

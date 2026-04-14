@@ -28,7 +28,9 @@ class cache_hit_seq extends uvm_sequence;
 			start_item(new_cache_tx);
 			if(addr_q.size() > 0) begin
 				new_cache_tx.address = addr_q[$urandom_range(0,addr_q.size()-1)];
-				new_cache_tx.rd_cmd = 1'b1;
+				new_cache_tx.rd_en   = 1'b1;
+				new_cache_tx.wr_en   = 1'b0;
+				new_cache_tx.wr_data = 'h0;
 				$display("Address is=%0h",new_cache_tx.address);
 			end
 			else begin
