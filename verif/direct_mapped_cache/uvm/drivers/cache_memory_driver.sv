@@ -32,7 +32,8 @@ class cache_memory_driver extends uvm_driver #(cache_mem_rsp);
 	virtual task main_phase(uvm_phase phase);
 		super.main_phase(phase);
 		forever begin
-			// driver the interface
+			wait(mem_vif.req==1);
+			`uvm_info("[cache_memory_driver]", "cache needs line", UVM_LOW)
 			seq_item_port.get_next_item(cache_miss_rsp);
 			// memory model is main memory wait 50 - 100 clock cycles, else its L2 wait 8-20
 			`ifdef MAIN_MEMORY
@@ -48,8 +49,11 @@ class cache_memory_driver extends uvm_driver #(cache_mem_rsp);
 				@(posedge mem_vif.clk);
 			end
 			cache_miss_rsp.generate_random_data();
+			@(posedge mem_vif.clk)
 			mem_vif.mem_ready <= cache_miss_rsp.mem_ready;
 			mem_vif.mem_data  <= cache_miss_rsp.mem_data;
+			@(posedge mem_vif.clk)
+			mem_vif.mem_ready <= 1'b0;
 			seq_item_port.item_done();
 		end
 		

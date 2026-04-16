@@ -34,10 +34,20 @@ module cache_top
 	logic [NO_BLOCK_BITS-1:0]                          	block_offset		;
 	logic [NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS] 	line_number			;
 	logic [ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS]  	tag_value			;
+
+	logic [NO_BLOCK_BITS-1:0]                          	new_block_offset		;
+	logic [NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS] 	new_line_number			;
+	logic [ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS]  	new_tag_value			;
+
+
+
 	logic 											   	hit_1				;
 	logic 											   	miss_1				;
 	logic 											   	clear_miss			;
 	logic 												cache_hit			;
+
+	logic                  miss_pending		;
+	logic [ADDR_WIDTH-1:0] miss_addr		;
 
 	// decode the information from the i_address
 	assign block_offset             = inp_port.address[NO_BLOCK_BITS-1:0];
@@ -45,38 +55,28 @@ module cache_top
 	assign tag_value                = inp_port.address[ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS];
 	assign cache_hit                = valid_array[line_number] && (tag_array[line_number] == tag_value);
 
-
+	assign new_block_offset     = mem_port.address[NO_BLOCK_BITS-1:0];
+	assign new_line_number      = mem_port.address[NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS];
+	assign new_tag_value        = mem_port.address[ADDR_WIDTH-1:NO_LINE_BITS+NO_BLOCK_BITS];
 
 	// block to determine hit or miss and on hit just put data on the bus
 	always_ff @(posedge clk or negedge rst_n) begin
 		if(~rst_n) begin
-			hit_1                 <= 'h0;
-			miss_1                <= 'h0;
-			out_port.o_data        <= 'h0;
 			out_port.o_valid 	  <= 'h0;
-		end else if(inp_port.rd_en) begin
-			if(cache_hit) begin
-				hit_1        <= 1'b1;
-				miss_1       <= 1'b0;
-
-				// extract entire line (ignore block offset)
-				out_port.o_data        <= mem_array[line_number];
-				out_port.o_valid 	  <= 1'b1;
+		end
+		else begin
+			if(cache_hit && inp_port.rd_en && miss_pending) begin
+				out_port.o_valid <= 1;
+				out_port.o_data <= mem_array[line_number];
+			end
+			else if(miss_pending && mem_port.mem_ready) begin
+				out_port.o_valid <= 1'b1;
+				out_port.o_data <= mem_port.mem_data;
 			end
 			else begin
-				hit_1                 <= 1'b0;
-				miss_1                <= 1'b1;
-				out_port.o_valid 	  <= 1'b0;
-				
-				// request data from external memory
-				mem_port.address      <= inp_port.address;
-			end			
+				out_port.o_data <= 0;
+			end
 		end
-		// else begin // simple handshake, need to change 
-		// 	hit_1        <= 0;
-		// 	miss_1       <= 0;
-		// 	o_data_valid <= 1'b0;
-		// end
 	end
 
 	// block  to manage write
@@ -88,30 +88,37 @@ module cache_top
 				mem_array[i]   <= 'h0;
 			end
 		end else begin
-			if(inp_port.wr_en) begin
+			if(inp_port.wr_en && !out_port.miss) begin
 				tag_array[line_number]   <= tag_value;
 				valid_array[line_number] <= 1'b1;
 				mem_array[line_number]   <= inp_port.wr_data;
+			end
+			else if(mem_port.req && mem_port.mem_ready) begin
+				tag_array[new_line_number] <= new_tag_value;
+				valid_array[new_line_number] <= 1'b1;
+				mem_array[new_line_number] <= mem_port.mem_data;
+
 			end
 		end
 	end
 
 
-	// to manage clear miss bit
-	always_ff @(posedge clk or negedge rst_n) begin : proc_miss_management
+	// to manage requesting from external memory
+	always_ff @(posedge clk or negedge rst_n) begin : proc_manage_fill
 		if(~rst_n) begin
-			clear_miss <= 1'b1;
+			miss_pending <= 1'b0;
+			mem_port.req <= 1'b0;
 		end else begin
-			if(inp_port.wr_en && out_port.miss) begin
-				clear_miss <= 1'b1;
+			if(inp_port.rd_en && !cache_hit && !miss_pending) begin
+				miss_pending <= 1'b1;
+				miss_addr <= inp_port.address;
+				mem_port.req <= 1'b1;
+				mem_port.address <= inp_port.address;
 			end
-			else if(out_port.miss) begin
-				clear_miss <= 1'b0;
+			else if(miss_pending && mem_port.mem_ready) begin
+				miss_pending <= 1'b0;
+				mem_port.req <= 1'b0;
 			end
-			else begin
-				clear_miss <= 1'b0;
-			end
-
 		end
 	end
 
@@ -124,7 +131,7 @@ module cache_top
 				dirty_array[i] <= 'h0;
 			end
 		end else begin
-			if (out_port.wr_data_valid && cache_hit) begin
+			if (out_port.o_valid && cache_hit) begin
 				dirty_array[line_number] <= 1'b1;
 			end
 		end
@@ -133,10 +140,8 @@ module cache_top
 
 
 	assign out_port.hit  = hit_1;
-	assign out_port.miss = miss_1 && !clear_miss;
+	assign out_port.miss = miss_pending;
 
-	// request line from external memory
-	assign mem_port.req = out_port.miss;
 
 endmodule : cache_top
 

@@ -19,7 +19,11 @@ package cache_pkg;
 	`include "cache_memory_driver.sv"
 	
 	`include "cache_monitor.sv"
+	`include "ext_mem_monitor.sv"
+
+	
 	`include "cache_agent.sv"
+	`include "cache_responder_agent.sv"
 	`include "cache_env.sv"
 	// scoreboard
 

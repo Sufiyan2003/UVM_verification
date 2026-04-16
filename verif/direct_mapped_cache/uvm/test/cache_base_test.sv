@@ -25,7 +25,9 @@ class cache_base_test extends uvm_test;
 	virtual task main_phase(uvm_phase phase);
 		// custom implementPtion in derived tests
 		// this will be overriden with that
-		// seq.start(env.c_agent.c_seqr);
+		phase.raise_objection(this);
+		seq.start(env.c_agent.c_seqr);
+		phase.drop_objection(this);
 	endtask : main_phase
 
 

@@ -3,7 +3,8 @@
 # Tool configurations
 UVM_PATH = C:/altera/25.1std/questa_fse/verilog_src/uvm-1.2/src
 VLOG = vlog -sv -linedebug
-VSIM = vsim -novopt
+# VSIM = vsim -novopt
+VSIM = vsim +acc
 
 # Project structure
 ROOT = $(CURDIR)
@@ -33,6 +34,7 @@ work:
 compile:
 	@echo "Compiling UVM_PATH and cache_tx!!"
 	$(VLOG) \
+	+incdir+./verif/direct_mapped_cache/uvm/interfaces \
 	+incdir+./verif/direct_mapped_cache/uvm/sequence_items \
 	+incdir+./verif/direct_mapped_cache/uvm/sequence \
 	+incdir+./verif/direct_mapped_cache/uvm/drivers \
@@ -43,8 +45,9 @@ compile:
 	+incdir+./verif/direct_mapped_cache/uvm/config \
 	+incdir+./verif/direct_mapped_cache/uvm/packages \
 	+incdir+./verif/direct_mapped_cache/uvm/tb \
-	./design/cache/cache_top.sv \
+	./design/cache/interfaces.sv \
 	./verif/direct_mapped_cache/uvm/packages/cache_pkg.sv \
+	./design/cache/cache_top.sv \
 	./verif/direct_mapped_cache/dm_cache_tb.sv
 
 run.%:

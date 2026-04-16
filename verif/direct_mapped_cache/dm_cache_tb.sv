@@ -34,8 +34,8 @@ module dm_cache_tb;
 	(
 		.clk           		(clk)		,    // Clock
 		.rst_n         		(resetn)	,    // Asynchronous reset active low
-		.cache_inp_if       (out_vif)	,
-		.cache_out_if       (inp_vif)	,
+		.out_port	        (out_vif)	,
+		.inp_port   	    (inp_vif)	,
 		.mem_port			(mem_vif)	
 	);
 

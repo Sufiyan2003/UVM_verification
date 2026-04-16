@@ -36,7 +36,7 @@ class cache_driver extends uvm_driver #(cache_tx);
 			$display("Driving=%0h",cache_inp_tx.address);
 			@(posedge inp_port.clk);
 			inp_port.address <= cache_inp_tx.address;
-			inp_port.rd_addr <= cache_inp_tx.rd_en;
+			inp_port.rd_en <= cache_inp_tx.rd_en;
 			inp_port.wr_data <= cache_inp_tx.wr_data;
 			inp_port.wr_en   <= cache_inp_tx.wr_en;
 			@(posedge inp_port.clk);
