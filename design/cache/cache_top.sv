@@ -106,18 +106,21 @@ module cache_top
 	// to manage requesting from external memory
 	always_ff @(posedge clk or negedge rst_n) begin : proc_manage_fill
 		if(~rst_n) begin
-			miss_pending <= 1'b0;
-			mem_port.req <= 1'b0;
+			miss_pending 		<= 1'b0;
+			mem_port.req 		<= 1'b0;
+			inp_port.o_stall 	<= 1'b0;
 		end else begin
 			if(inp_port.rd_en && !cache_hit && !miss_pending) begin
 				miss_pending <= 1'b1;
 				miss_addr <= inp_port.address;
 				mem_port.req <= 1'b1;
 				mem_port.address <= inp_port.address;
+				inp_port.o_stall <= 1'b1;
 			end
 			else if(miss_pending && mem_port.mem_ready) begin
 				miss_pending <= 1'b0;
 				mem_port.req <= 1'b0;
+				inp_port.o_stall <= 1'b0;
 			end
 		end
 	end

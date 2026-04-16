@@ -21,7 +21,7 @@ class cache_tx extends uvm_sequence_item;
    function void randomize_tr();
         address = $urandom();
    	    rd_en = $urandom();
-        wr_en = $urandom();
+        wr_en = !rd_en;
         wr_data = $urandom();
    endfunction : randomize_tr
 

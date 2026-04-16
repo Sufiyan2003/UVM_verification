@@ -32,29 +32,31 @@ class cache_memory_driver extends uvm_driver #(cache_mem_rsp);
 	virtual task main_phase(uvm_phase phase);
 		super.main_phase(phase);
 		forever begin
-			wait(mem_vif.req==1);
-			`uvm_info("[cache_memory_driver]", "cache needs line", UVM_LOW)
-			seq_item_port.get_next_item(cache_miss_rsp);
-			// memory model is main memory wait 50 - 100 clock cycles, else its L2 wait 8-20
-			`ifdef MAIN_MEMORY
-				cycle_wait = $urandom_range(20,50);
-			`else 
-				// is L2 cache wait is less
-				cycle_wait = $urandom_range(8,20);
-			`endif
-			
-			`uvm_info("[cache_memory_driver]", "Memory Model is waiting for a cache miss", UVM_MEDIUM)
-			// randomize the randomized fill data here
-			for (int i = 0; i < cycle_wait; i++) begin
-				@(posedge mem_vif.clk);
-			end
-			cache_miss_rsp.generate_random_data();
-			@(posedge mem_vif.clk)
-			mem_vif.mem_ready <= cache_miss_rsp.mem_ready;
-			mem_vif.mem_data  <= cache_miss_rsp.mem_data;
-			@(posedge mem_vif.clk)
-			mem_vif.mem_ready <= 1'b0;
-			seq_item_port.item_done();
+		    @(posedge mem_vif.clk);
+
+		    if (mem_vif.req) begin
+		        `uvm_info("[cache_memory_driver]", "cache needs line", UVM_LOW)
+
+		        `ifdef MAIN_MEMORY
+		            cycle_wait = $urandom_range(20,50);
+		        `else 
+		            cycle_wait = $urandom_range(8,20);
+		        `endif
+
+		        for (int i = 0; i < cycle_wait; i++) begin
+		            @(posedge mem_vif.clk);
+		        end
+
+		        cache_miss_rsp.generate_random_data();
+
+		        @(posedge mem_vif.clk)
+		        mem_vif.mem_ready <= cache_miss_rsp.mem_ready;
+		        mem_vif.mem_data  <= cache_miss_rsp.mem_data;
+
+		        @(posedge mem_vif.clk)
+		        mem_vif.mem_ready <= 1'b0;
+		        wait(mem_vif.req == 0);
+		    end
 		end
 		
 	endtask : main_phase

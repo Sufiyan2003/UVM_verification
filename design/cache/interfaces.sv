@@ -4,6 +4,7 @@ interface cache_inp_if #(ADDR_WIDTH=32, LINE_WIDTH=32) (input clk, input rst_n);
 	logic                  			  rd_en         ; 
 	logic [LINE_WIDTH-1:0] 			  wr_data       ;
 	logic 				   			  wr_en 		;  
+	logic 							  o_stall		;
 	// add wr_en here 
 endinterface
 
