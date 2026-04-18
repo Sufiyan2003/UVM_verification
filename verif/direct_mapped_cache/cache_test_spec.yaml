@@ -31,6 +31,7 @@ cache_base_test:
   description: "This is just to test the cache randomly"
   plusargs:
     - +UVM_VERBOSITY=UVM_LOW
+    # - -sv_seed = 1961982942
     - +UVM_TESTNAME=cache_base_test
     - +num_rd_cmds=100
 

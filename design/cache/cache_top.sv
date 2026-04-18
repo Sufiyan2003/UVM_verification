@@ -20,7 +20,8 @@ module cache_top
 	cache_mem_if							mem_port			// This is to fill the cache in case of a miss
 );
 
-	localparam NO_BLOCK_BITS = $clog2(LINE_WIDTH/8)							;
+	// dont really need this block offset right now
+	localparam NO_BLOCK_BITS = 0											;
 	localparam NO_LINE_BITS  = $clog2(DEPTH)								;
 	localparam NO_TAG_BITS   = ADDR_WIDTH - NO_LINE_BITS - NO_BLOCK_BITS	;
 
@@ -31,11 +32,11 @@ module cache_top
 	logic [LINE_WIDTH-1:0]        mem_array[DEPTH]							;
 
 
-	logic [NO_BLOCK_BITS-1:0]                          	block_offset		;
+	// logic [NO_BLOCK_BITS-1:0]                          	block_offset		;
 	logic [NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS] 	line_number			;
 	logic [ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS]  	tag_value			;
 
-	logic [NO_BLOCK_BITS-1:0]                          	new_block_offset		;
+	// logic [NO_BLOCK_BITS-1:0]                          	new_block_offset		;
 	logic [NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS] 	new_line_number			;
 	logic [ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS]  	new_tag_value			;
 
@@ -50,12 +51,12 @@ module cache_top
 	logic [ADDR_WIDTH-1:0] miss_addr		;
 
 	// decode the information from the i_address
-	assign block_offset             = inp_port.address[NO_BLOCK_BITS-1:0];
+	// assign block_offset             = inp_port.address[NO_BLOCK_BITS-1:0];
 	assign line_number              = inp_port.address[NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS];
 	assign tag_value                = inp_port.address[ADDR_WIDTH-1 : NO_LINE_BITS+NO_BLOCK_BITS];
 	assign cache_hit                = valid_array[line_number] && (tag_array[line_number] == tag_value);
 
-	assign new_block_offset     = mem_port.address[NO_BLOCK_BITS-1:0];
+	// assign new_block_offset     = mem_port.address[NO_BLOCK_BITS-1:0];
 	assign new_line_number      = mem_port.address[NO_LINE_BITS+NO_BLOCK_BITS-1:NO_BLOCK_BITS];
 	assign new_tag_value        = mem_port.address[ADDR_WIDTH-1:NO_LINE_BITS+NO_BLOCK_BITS];
 
@@ -75,6 +76,7 @@ module cache_top
 			end
 			else begin
 				out_port.o_data <= 0;
+				out_port.o_valid <= 1'b0;
 			end
 		end
 	end

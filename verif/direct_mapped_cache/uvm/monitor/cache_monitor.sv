@@ -20,13 +20,11 @@ class cache_monitor extends uvm_component;
 
 	function new(string name = "cache_monitor", uvm_component parent);
 		super.new(name,parent);
-		cache_inp_tx = new();
-
+		cache_inp_port = new("cache_inp_port", this);
 	endfunction : new
 
 	virtual function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-		cache_inp_port = new("cache_inp_port", this);
 
 		// get interfaces
 		if(!uvm_config_db#(virtual cache_inp_if #(32,32))::get(this, "", "inp_vif", cache_vif))
@@ -38,12 +36,17 @@ class cache_monitor extends uvm_component;
 		super.main_phase(phase);
 		forever begin
 			@(posedge cache_vif.clk);
-			cache_inp_tx.address <= cache_vif.address;
-			cache_inp_tx.rd_en   <= cache_vif.rd_en;
-			cache_inp_tx.wr_en   <= cache_vif.wr_en;
-			cache_inp_tx.wr_data <= cache_vif.wr_data;
-			cache_inp_port.write(cache_inp_tx);
-			@(posedge cache_vif.clk);
+			if(!cache_vif.o_stall && (cache_vif.rd_en || cache_vif.wr_en)) begin
+				cache_inp_tx = cache_tx::type_id::create("cache_inp_tx");
+				cache_inp_tx.address = cache_vif.address;
+				cache_inp_tx.rd_en   = cache_vif.rd_en;
+				cache_inp_tx.wr_en   = cache_vif.wr_en;
+				cache_inp_tx.wr_data = cache_vif.wr_data;
+				`uvm_info("CACHE_MONITOR", "Input sent to scoreboard!", UVM_LOW)
+				cache_inp_tx.display_tx();
+				cache_inp_port.write(cache_inp_tx);
+				@(posedge cache_vif.clk);
+			end
 		end
 	endtask : main_phase
 

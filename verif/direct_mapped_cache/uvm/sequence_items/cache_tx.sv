@@ -25,6 +25,13 @@ class cache_tx extends uvm_sequence_item;
         wr_data = $urandom();
    endfunction : randomize_tr
 
+   function void display_tx();
+    $display("Addr: %0h",address);
+    $display("rd_en: %0h",rd_en);
+    $display("wr_en: %0h",wr_en);
+    $display("wr_data: %0h",wr_data);
+   endfunction
+
 endclass : cache_tx
 
 
@@ -34,12 +41,20 @@ class cache_rsp extends uvm_sequence_item;
 
     bit         hit     ;
     bit         miss    ;
-    bit [7:0]   o_data  ;
+    bit [31:0]  o_data  ;
     bit         o_valid ;
 
     function new(string name="cache_rsp");
         super.new(name);
     endfunction
+
+    function void display_output();
+        $display("hit: %0h",hit);
+        $display("miss: %0h",miss);
+        $display("o_data: %0h",o_data);
+        $display("o_valid: %0h",o_valid);
+    endfunction : display_output
+
 
 endclass
 
@@ -60,5 +75,12 @@ class cache_mem_rsp extends uvm_sequence_item;
         mem_ready = 1'b1;
         mem_data = $urandom();
     endfunction : generate_random_data
+
+    function void display_rsp();
+        $display("mem_data: %0h",mem_data);
+        $display("address: %0h",address);
+        $display("req: %0h",req);
+        $display("mem_ready: %0h",mem_ready);
+    endfunction : display_rsp
 endclass
 

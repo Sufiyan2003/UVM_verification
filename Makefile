@@ -40,12 +40,14 @@ compile:
 	+incdir+./verif/direct_mapped_cache/uvm/drivers \
 	+incdir+./verif/direct_mapped_cache/uvm/monitor \
 	+incdir+./verif/direct_mapped_cache/uvm/agents \
+	+incdir+./verif/direct_mapped_cache/uvm/scoreboard \
 	+incdir+./verif/direct_mapped_cache/uvm/env \
 	+incdir+./verif/direct_mapped_cache/uvm/test \
 	+incdir+./verif/direct_mapped_cache/uvm/config \
 	+incdir+./verif/direct_mapped_cache/uvm/packages \
 	+incdir+./verif/direct_mapped_cache/uvm/tb \
 	./design/cache/interfaces.sv \
+	./verif/direct_mapped_cache/uvm/packages/cache_struct_pkg.sv \
 	./verif/direct_mapped_cache/uvm/packages/cache_pkg.sv \
 	./design/cache/cache_top.sv \
 	./verif/direct_mapped_cache/dm_cache_tb.sv
@@ -63,7 +65,7 @@ gui.%:
 debug.%:
 	$(eval TEST_NAME=$*)
 	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
-	$(VSIM) -debugDB $(TOP) +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do "log -r /*; add wave -r /*;"
+	$(VSIM) -sv_seed random $(TOP)  +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do "log -r /*; add wave -r /*;"
 
 baremetal:
 	$(VSIM)  $(TOP)  $(RUN_ARGS) -do "add wave -r /*; run -all"

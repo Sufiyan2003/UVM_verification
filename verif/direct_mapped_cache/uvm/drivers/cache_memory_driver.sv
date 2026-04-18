@@ -31,32 +31,32 @@ class cache_memory_driver extends uvm_driver #(cache_mem_rsp);
 
 	virtual task main_phase(uvm_phase phase);
 		super.main_phase(phase);
+		mem_vif.mem_ready = 1'b0;
+		mem_vif.mem_data = 1'b0;
 		forever begin
-		    @(posedge mem_vif.clk);
+		    @(posedge mem_vif.req);
 
-		    if (mem_vif.req) begin
-		        `uvm_info("[cache_memory_driver]", "cache needs line", UVM_LOW)
 
-		        `ifdef MAIN_MEMORY
-		            cycle_wait = $urandom_range(20,50);
-		        `else 
-		            cycle_wait = $urandom_range(8,20);
-		        `endif
+	        `uvm_info("[cache_memory_driver]", "cache needs line", UVM_LOW)
 
-		        for (int i = 0; i < cycle_wait; i++) begin
-		            @(posedge mem_vif.clk);
-		        end
+	        `ifdef MAIN_MEMORY
+	            cycle_wait = $urandom_range(20,50);
+	        `else 
+	            cycle_wait = $urandom_range(8,20);
+	        `endif
 
-		        cache_miss_rsp.generate_random_data();
+	        for (int i = 0; i < cycle_wait; i++) begin
+	            @(posedge mem_vif.clk);
+	        end
 
-		        @(posedge mem_vif.clk)
-		        mem_vif.mem_ready <= cache_miss_rsp.mem_ready;
-		        mem_vif.mem_data  <= cache_miss_rsp.mem_data;
+	        cache_miss_rsp.generate_random_data();
 
-		        @(posedge mem_vif.clk)
-		        mem_vif.mem_ready <= 1'b0;
-		        wait(mem_vif.req == 0);
-		    end
+	        @(posedge mem_vif.clk)
+	        mem_vif.mem_ready <= cache_miss_rsp.mem_ready;
+	        mem_vif.mem_data  <= cache_miss_rsp.mem_data;
+
+	        @(posedge mem_vif.clk)
+	        mem_vif.mem_ready <= 1'b0;
 		end
 		
 	endtask : main_phase
