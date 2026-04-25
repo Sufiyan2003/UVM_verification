@@ -58,11 +58,26 @@ class cache_scoreboard extends uvm_scoreboard;
 			tx_in = cache_input_q.pop_front();
 			if(tx_in.wr_en) begin
 				// update the cache reference model on a write
-				temp_line.tag = tx_in.address[31:4];
-				temp_line.data = tx_in.wr_data;
-				temp_line.valid = 1'b1;
-				temp_line.dirty = 1'b0; // later change it to 1 if external 
-				model_cache[tx_in.address[3:0]] = temp_line;
+				// TODO: must check for miss here as well
+				if(check_hit(tx_in.address)) begin
+					temp_line.tag = tx_in.address[31:4];
+					temp_line.data = tx_in.wr_data;
+					temp_line.valid = 1'b1;
+					temp_line.dirty = 1'b0; // later change it to 1 if external 
+					model_cache[tx_in.address[3:0]] = temp_line;
+				end
+				else begin
+					// wait for mem interfaces
+					wait(cache_fill_q.size() > 0);
+					ext_mem_resp = cache_fill_q.pop_front();
+					temp_line.tag = ext_mem_resp.address[31:4];
+					temp_line.data = ext_mem_resp.mem_data;
+					temp_line.dirty = 1'b0;
+					temp_line.valid = 1'b1;
+					// update the reference model here
+					model_cache[tx_in.address[3:0]] = temp_line;
+				end
+
 			end
 			else begin
 				// check if its a hit or a miss

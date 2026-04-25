@@ -1,0 +1,10 @@
+# Author: Muhammad Sufiyan Sadiq
+# Description: This file has all of the test yamls for all
+# sub projects that you may want. If you add new test specs
+# just add the yaml here
+#
+
+
+all_test_specs:
+  - ./verif/direct_mapped_cache/cache_test_spec.yaml
+  - ./verif/async_fifo/test_spec.yaml

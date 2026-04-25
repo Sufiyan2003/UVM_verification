@@ -49,6 +49,7 @@ module cache_top
 
 	logic                  miss_pending		;
 	logic [ADDR_WIDTH-1:0] miss_addr		;
+	logic 					read_miss		;
 
 	// decode the information from the i_address
 	// assign block_offset             = inp_port.address[NO_BLOCK_BITS-1:0];
@@ -70,7 +71,7 @@ module cache_top
 				out_port.o_valid <= 1;
 				out_port.o_data <= mem_array[line_number];
 			end
-			else if(miss_pending && mem_port.mem_ready) begin
+			else if(miss_pending && mem_port.mem_ready && read_miss) begin
 				out_port.o_valid <= 1'b1;
 				out_port.o_data <= mem_port.mem_data;
 			end
@@ -90,16 +91,17 @@ module cache_top
 				mem_array[i]   <= 'h0;
 			end
 		end else begin
-			if(inp_port.wr_en && !out_port.miss) begin
-				tag_array[line_number]   <= tag_value;
-				valid_array[line_number] <= 1'b1;
-				mem_array[line_number]   <= inp_port.wr_data;
+			// need to modify this write policy its also going to have
+			if(cache_hit && !inp_port.o_stall && inp_port.wr_en) begin
+				tag_array[line_number]    <= tag_value;
+				valid_array[line_number]  <= 1'b1;
+				mem_array[line_number]    <= inp_port.wr_data;
 			end
+			// this is to manage write to mem array from read and write misses
 			else if(mem_port.req && mem_port.mem_ready) begin
 				tag_array[new_line_number] <= new_tag_value;
 				valid_array[new_line_number] <= 1'b1;
 				mem_array[new_line_number] <= mem_port.mem_data;
-
 			end
 		end
 	end
@@ -111,6 +113,7 @@ module cache_top
 			miss_pending 		<= 1'b0;
 			mem_port.req 		<= 1'b0;
 			inp_port.o_stall 	<= 1'b0;
+			read_miss 			<= 1'b0;
 		end else begin
 			if(inp_port.rd_en && !cache_hit && !miss_pending) begin
 				miss_pending <= 1'b1;
@@ -118,6 +121,15 @@ module cache_top
 				mem_port.req <= 1'b1;
 				mem_port.address <= inp_port.address;
 				inp_port.o_stall <= 1'b1;
+				read_miss		<= 1'b1;
+			end
+			else if(inp_port.wr_en && !cache_hit && !miss_pending) begin
+				miss_pending		<= 1'b1;
+				miss_addr 			<= inp_port.address;
+				mem_port.req 		<= 1'b1;
+				mem_port.address 	<= inp_port.address;
+				inp_port.o_stall 	<= 1'b1;
+				read_miss			<= 1'b0;
 			end
 			else if(miss_pending && mem_port.mem_ready) begin
 				miss_pending <= 1'b0;

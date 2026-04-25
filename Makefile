@@ -12,6 +12,8 @@ TOP = dm_cache_tb
 TEST ?= cache_base_test
 WAVE ?= 0
 
+OUT_DIR = output
+
 # DO command configuration
 ifeq ($(WAVE), 1)
     DO_CMD = "add wave -r /*; run -all; quit"
@@ -29,6 +31,11 @@ all: clean compile run
 work:
 	vlib work
 	vmap work work
+
+gen:
+	@echo "Compiling all tests in test_db.yaml"
+	$(shell python3 extract_all_tests.py)
+
 
 # need to add all these into yamls
 compile:
@@ -52,19 +59,38 @@ compile:
 	./design/cache/cache_top.sv \
 	./verif/direct_mapped_cache/dm_cache_tb.sv
 
+check.%:
+	@echo "checking this time"
+
+	$(eval BLOCK := $(word 1, $(subst ., ,$*)))
+	$(eval TEST  := $(word 2, $(subst ., ,$*)))
+
+# 	@echo "BLOCK=$(BLOCK)"
+# 	@echo "TEST=$(TEST)"
+
+# 	@mkdir .\$(OUT_DIR)\$(BLOCK)\$(TEST)
+
+	# FIX: use TEST, not TEST_NAME
+	$(eval RUN_ARGS := $(shell python3 get_test_args.py $(TEST)))
+
+	@echo "RUN_ARGS=$(RUN_ARGS)"
+
+	$(VSIM) -c -sv_seed random $(TOP) $(RUN_ARGS) -do $(DO_CMD)
+	
+
 run.%:
 	$(eval TEST_NAME=$*)
-	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
+	$(eval RUN_ARGS=$(shell python3 get_test_args.py $(TEST_NAME)))
 	$(VSIM) -c -sv_seed random $(TOP) $(RUN_ARGS) -do $(DO_CMD)
 
 gui.%:
 	$(eval TEST_NAME=$*)
-	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
+	$(eval RUN_ARGS=$(shell python3 get_test_args.py $(TEST_NAME)))
 	$(VSIM) -sv_seed random $(TOP)  $(RUN_ARGS) -do "add wave -r /*; run -all"
 
 debug.%:
 	$(eval TEST_NAME=$*)
-	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
+	$(eval RUN_ARGS=$(shell python3 get_test_args.py $(TEST_NAME)))
 	$(VSIM) -sv_seed random $(TOP)  +UVM_TESTNAME=$(TEST) $(RUN_ARGS) -do "log -r /*; add wave -r /*;"
 
 baremetal:
@@ -73,6 +99,6 @@ baremetal:
 
 runOpt.%:
 	$(eval TEST_NAME=$*)
-	$(eval RUN_ARGS=$(shell python3 extract_all_tests.py $(TEST_NAME)))
+	$(eval RUN_ARGS=$(shell python3 get_test_args.py $(TEST_NAME)))
 	vopt +acc $(TOP) -o $(TOP)_opt $(RUN_ARGS)
 	vsim -sv_seed random $(TOP)_opt $(RUN_ARGS) -do "log -r /*; add wave -r /*; run -all"
