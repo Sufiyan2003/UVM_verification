@@ -79,3 +79,7 @@ runOpt.%:
 	$(eval RUN_ARGS=$(shell python3 get_test_args.py $(TEST_NAME)))
 	vopt +acc $(TOP) -o $(TOP)_opt $(RUN_ARGS)
 	vsim -sv_seed random $(TOP)_opt $(RUN_ARGS) -do "log -r /*; add wave -r /*; run -all"
+
+clean:
+	@echo "Cleaning output directory..."
+	@if exist output rmdir /s /q output
