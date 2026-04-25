@@ -2,9 +2,6 @@ import yaml
 import sys
 
 
-# get this yaml file and extract all the test cases from this here yaml
-file_name = "./verif/direct_mapped_cache/cache_test_spec.yaml"
-
 # contains yaml for all verif env
 tests_summary_path = "./cfg/test_paths.yaml"
 test_db_path = "./test_db.yaml"

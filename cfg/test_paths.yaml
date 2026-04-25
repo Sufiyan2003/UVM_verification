@@ -6,5 +6,5 @@
 
 
 all_test_specs:
-  - ./verif/direct_mapped_cache/cache_test_spec.yaml
+  - ./verif/cache/cache_test_spec.yaml
   - ./verif/async_fifo/test_spec.yaml

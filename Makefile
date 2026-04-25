@@ -11,8 +11,9 @@ ROOT = $(CURDIR)
 TOP = dm_cache_tb
 TEST ?= cache_base_test
 WAVE ?= 0
-
 OUT_DIR = output
+PROJ_NAME ?= default
+PROJ_DIR  = $(OUT_DIR)/$(PROJ_NAME)
 
 # DO command configuration
 ifeq ($(WAVE), 1)
@@ -34,54 +35,30 @@ work:
 
 gen:
 	@echo "Compiling all tests in test_db.yaml"
-	$(shell python3 extract_all_tests.py)
+	@python3 extract_all_tests.py
 
 
 # need to add all these into yamls
-compile:
+compile.%:
 	@echo "Compiling UVM_PATH and cache_tx!!"
-	$(VLOG) \
-	+incdir+./verif/direct_mapped_cache/uvm/interfaces \
-	+incdir+./verif/direct_mapped_cache/uvm/sequence_items \
-	+incdir+./verif/direct_mapped_cache/uvm/sequence \
-	+incdir+./verif/direct_mapped_cache/uvm/drivers \
-	+incdir+./verif/direct_mapped_cache/uvm/monitor \
-	+incdir+./verif/direct_mapped_cache/uvm/agents \
-	+incdir+./verif/direct_mapped_cache/uvm/scoreboard \
-	+incdir+./verif/direct_mapped_cache/uvm/env \
-	+incdir+./verif/direct_mapped_cache/uvm/test \
-	+incdir+./verif/direct_mapped_cache/uvm/config \
-	+incdir+./verif/direct_mapped_cache/uvm/packages \
-	+incdir+./verif/direct_mapped_cache/uvm/tb \
-	./design/cache/interfaces.sv \
-	./verif/direct_mapped_cache/uvm/packages/cache_struct_pkg.sv \
-	./verif/direct_mapped_cache/uvm/packages/cache_pkg.sv \
-	./design/cache/cache_top.sv \
-	./verif/direct_mapped_cache/dm_cache_tb.sv
+	$(eval INCL := $(shell python3 compile_project.py $*))
+	$(VLOG) $(INCL)
 
-check.%:
-	@echo "checking this time"
-
-	$(eval BLOCK := $(word 1, $(subst ., ,$*)))
-	$(eval TEST  := $(word 2, $(subst ., ,$*)))
-
-# 	@echo "BLOCK=$(BLOCK)"
-# 	@echo "TEST=$(TEST)"
-
-# 	@mkdir .\$(OUT_DIR)\$(BLOCK)\$(TEST)
-
-	# FIX: use TEST, not TEST_NAME
-	$(eval RUN_ARGS := $(shell python3 get_test_args.py $(TEST)))
-
-	@echo "RUN_ARGS=$(RUN_ARGS)"
-
-	$(VSIM) -c -sv_seed random $(TOP) $(RUN_ARGS) -do $(DO_CMD)
-	
 
 run.%:
-	$(eval TEST_NAME=$*)
-	$(eval RUN_ARGS=$(shell python3 get_test_args.py $(TEST_NAME)))
-	$(VSIM) -c -sv_seed random $(TOP) $(RUN_ARGS) -do $(DO_CMD)
+	$(eval TEST_NAME := $*)
+	$(eval RUN_ARGS := $(shell python3 get_test_args.py $(TEST_NAME)))
+	$(eval RUN_DIR := $(shell python3 get_run_dir.py "$(PROJ_DIR)" "$(TEST_NAME)"))
+
+	@if not exist "$(RUN_DIR)" mkdir "$(RUN_DIR)"
+
+	@echo ============ Running $(TEST_NAME) ============
+	@echo Saving logs in $(RUN_DIR)
+
+	$(VSIM) -c -sv_seed random $(TOP) \
+	$(RUN_ARGS) \
+	-do $(DO_CMD) \
+	-l $(RUN_DIR)/sim.log
 
 gui.%:
 	$(eval TEST_NAME=$*)

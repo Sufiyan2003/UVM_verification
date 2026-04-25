@@ -1,0 +1,21 @@
+# Yaml which contains the files and directories used for verif
+# include all interfaces, design packages in the correct order
+
+vlog_dirs:
+  - +incdir+./verif/cache/uvm/interfaces
+  - +incdir+./verif/cache/uvm/sequence_items
+  - +incdir+./verif/cache/uvm/sequence
+  - +incdir+./verif/cache/uvm/drivers
+  - +incdir+./verif/cache/uvm/monitor
+  - +incdir+./verif/cache/uvm/agents
+  - +incdir+./verif/cache/uvm/scoreboard
+  - +incdir+./verif/cache/uvm/env
+  - +incdir+./verif/cache/uvm/test
+  - +incdir+./verif/cache/uvm/config
+  - +incdir+./verif/cache/uvm/packages
+  - +incdir+./verif/cache/uvm/tb
+
+vlog_files:
+  - ${ROOT}/verif/cache/uvm/packages/cache_struct_pkg.sv
+  - ${ROOT}/verif/cache/uvm/packages/cache_pkg.sv
+  - ${ROOT}/verif/cache/dm_cache_tb.sv
