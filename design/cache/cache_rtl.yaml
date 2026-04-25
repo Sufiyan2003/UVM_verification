@@ -1,0 +1,7 @@
+# Yaml which contains the files and directories used for this design
+# include all interfaces, design packages in the correct order
+
+vlog_files:
+  - ${ROOT}/design/cache/interfaces.sv
+  - ${ROOT}/design/cache/cache_top.sv
+vlog_dirs:

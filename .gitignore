@@ -5,3 +5,5 @@ vish_stacktrace.vstf
 vsim.dbg
 vsim_stacktrace.vstf
 output/*
+wlft*
+test_db.yaml
